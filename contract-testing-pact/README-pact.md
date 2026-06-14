@@ -18,7 +18,7 @@ without the two services ever having to run together in a shared environment.
 That's what makes it scale across teams and independently-deployed services.
 
 Key principle: contracts assert on **type/shape**, not exact data. The consumer
-doesn't care that the email is `janet.weaver@reqres.in` — only that it's a
+doesn't care that the email is `janet.weaver@example.com` — only that it's a
 string shaped like an email. This keeps contracts stable as data changes.
 
 ## The flow in this folder

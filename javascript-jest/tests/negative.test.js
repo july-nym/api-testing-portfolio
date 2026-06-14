@@ -3,37 +3,23 @@ const { buildBooking } = require('../src/helpers/dataHelper');
 const config = require('../src/config');
 
 describe('Negative and edge cases', () => {
-  let reqres;
+  let api;
   let booker;
-  let placeholder;
 
   beforeAll(() => {
-    reqres = createClient({
-      baseURL: config.reqres.baseURL,
-      apiKey: config.reqres.apiKey,
-    });
+    api = createClient({ baseURL: config.jsonplaceholder.baseURL });
     booker = createClient({ baseURL: config.booker.baseURL });
-    placeholder = createClient({ baseURL: config.jsonplaceholder.baseURL });
   });
 
-  test('login without password is a 400 with a clear reason', async () => {
-    const res = await reqres.post('/login', { email: 'peter.holt@reqres.in' });
-    expect(res).toHaveStatus(400);
-    expect(res.data.error).toBe('Missing password');
-  });
-
-  test('registering an unseeded email is rejected', async () => {
-    const res = await reqres.post('/register', {
-      email: 'stranger@example.com',
-      password: 'x',
-    });
-    expect(res).toHaveStatus(400);
-  });
-
-  test.each([0, 23, 999])('unknown reqres user id %i returns 404', async (id) => {
-    const res = await reqres.get(`/users/${id}`);
+  test.each([11, 99, 999])('unknown user id %i returns 404', async (id) => {
+    // jsonplaceholder only seeds 10 users; anything beyond is a 404
+    const res = await api.get(`/users/${id}`);
     expect(res).toHaveStatus(404);
-    expect(res.data).toEqual({});
+  });
+
+  test('unknown post returns 404', async () => {
+    const res = await api.get('/posts/9999');
+    expect(res).toHaveStatus(404);
   });
 
   test('booker rejects a write with no auth cookie (403)', async () => {
@@ -53,8 +39,8 @@ describe('Negative and edge cases', () => {
     expect(res.data.reason).toBe('Bad credentials');
   });
 
-  test('unknown jsonplaceholder resource returns 404', async () => {
-    const res = await placeholder.get('/posts/9999');
+  test('fetching a non-existent booking returns 404', async () => {
+    const res = await booker.get('/booking/99999999');
     expect(res).toHaveStatus(404);
   });
 });

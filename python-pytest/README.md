@@ -4,10 +4,11 @@ API test suite built with **Python + requests + pytest**.
 
 ## What it covers
 - Full CRUD against restful-booker (create → read → update → delete → confirm gone)
-- Auth flows on reqres and a reusable booker token fixture
+- Auth token flow + a reusable booker token fixture
+- User reads + post CRUD against jsonplaceholder
 - JSON schema validation (`jsonschema`)
 - Parameterised tests (`pytest.mark.parametrize`)
-- Negative paths: 400 / 401 / 403 / 404 and contract-quirk pinning
+- Negative paths: 403 / 404 and contract-quirk pinning
 - Response-time assertions against a configurable SLA
 - Custom markers: `smoke`, `regression`, `negative`
 

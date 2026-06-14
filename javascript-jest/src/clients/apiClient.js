@@ -2,14 +2,16 @@
  * Factory for pre-configured axios instances.
  *
  * Interceptors do two jobs here:
- *   1. Request side  — inject the reqres API key and (optionally) a bearer token.
+ *   1. Request side  — inject an optional API key and (optionally) a bearer token.
  *   2. Response side — stamp how long the round-trip took so the toRespondWithin
  *      matcher has something to read, and let non-2xx responses resolve instead
  *      of throwing. Tests want to assert on a 404, not catch it.
  */
 const axios = require('axios');
 
-function createClient({ baseURL, apiKey, timeout = 10000 } = {}) {
+// Generous default timeout: restful-booker's free dyno can cold-start for tens
+// of seconds, and we'd rather wait than flake the first call of a CI run.
+function createClient({ baseURL, apiKey, timeout = 30000 } = {}) {
   const instance = axios.create({
     baseURL,
     timeout,

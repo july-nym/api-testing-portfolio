@@ -1,44 +1,35 @@
 const { createClient } = require('../src/clients/apiClient');
-const { getBookerToken, loginToReqres } = require('../src/helpers/authHelper');
+const { getBookerToken } = require('../src/helpers/authHelper');
 const config = require('../src/config');
 
-describe('Authentication', () => {
-  let reqres;
+describe('Authentication (restful-booker)', () => {
+  let booker;
 
   beforeAll(() => {
-    reqres = createClient({
-      baseURL: config.reqres.baseURL,
-      apiKey: config.reqres.apiKey,
-    });
+    booker = createClient({ baseURL: config.booker.baseURL });
   });
 
-  test('seeded reqres user receives a token on login', async () => {
-    const token = await loginToReqres(reqres, 'eve.holt@reqres.in', 'cityslicka');
+  test('valid credentials issue a usable token', async () => {
+    const token = await getBookerToken();
     expect(token).toBeString();
     expect(token.length).toBeGreaterThan(10);
   });
 
-  test('register returns a fixed id and a token', async () => {
-    const res = await reqres.post('/register', {
-      email: 'eve.holt@reqres.in',
-      password: 'pistol',
+  test('bad credentials come back as a reason, not a 401', async () => {
+    const res = await booker.post('/auth', {
+      username: 'admin',
+      password: 'definitely-wrong',
     });
+    // booker answers 200 with a reason body — a quirk worth pinning
     expect(res).toHaveStatus(200);
-    expect(res.data).toContainKeys(['id', 'token']);
-    expect(res.data.id).toBe(4);
-  });
-
-  test('booker issues a usable token', async () => {
-    const token = await getBookerToken();
-    expect(token).toBeString();
+    expect(res.data.reason).toBe('Bad credentials');
   });
 
   test('axios interceptor injects a bearer token once set', async () => {
-    reqres.setAuthToken('header-injection-check');
-    // /users/2 doesn't require auth, but we can read the outgoing header back
-    // off the response config to prove the interceptor fired.
-    const res = await reqres.get('/users/2');
+    booker.setAuthToken('header-injection-check');
+    // any GET works; we read the outgoing header back off the response config
+    const res = await booker.get('/ping');
     expect(res.config.headers.Authorization).toBe('Bearer header-injection-check');
-    reqres.clearAuthToken();
+    booker.clearAuthToken();
   });
 });

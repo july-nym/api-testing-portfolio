@@ -10,21 +10,38 @@ const addFormats = require('ajv-formats');
 const ajv = new Ajv({ allErrors: true });
 addFormats(ajv); // enables "format": "email" etc.
 
+// jsonplaceholder user — only the fields we assert on are required; the nested
+// address/company objects carry more, but we don't over-specify the contract.
 const singleUserSchema = {
   type: 'object',
-  required: ['data', 'support'],
+  required: ['id', 'name', 'username', 'email', 'address', 'phone', 'company'],
   properties: {
-    data: {
+    id: { type: 'integer' },
+    name: { type: 'string' },
+    username: { type: 'string' },
+    email: { type: 'string', format: 'email' },
+    phone: { type: 'string' },
+    website: { type: 'string' },
+    address: {
       type: 'object',
-      required: ['id', 'email', 'first_name', 'last_name', 'avatar'],
-      properties: {
-        id: { type: 'integer' },
-        email: { type: 'string', format: 'email' },
-        first_name: { type: 'string' },
-        last_name: { type: 'string' },
-        avatar: { type: 'string' },
-      },
+      required: ['street', 'suite', 'city', 'zipcode'],
     },
+    company: {
+      type: 'object',
+      required: ['name'],
+    },
+  },
+};
+
+// jsonplaceholder POST /posts -> 201
+const postCreateSchema = {
+  type: 'object',
+  required: ['id', 'title', 'body', 'userId'],
+  properties: {
+    id: { type: 'integer' },
+    title: { type: 'string' },
+    body: { type: 'string' },
+    userId: { type: 'integer' },
   },
 };
 
@@ -64,4 +81,4 @@ function validate(schema, payload) {
   return { valid, errors: check.errors || [] };
 }
 
-module.exports = { validate, singleUserSchema, bookingCreateSchema };
+module.exports = { validate, singleUserSchema, postCreateSchema, bookingCreateSchema };

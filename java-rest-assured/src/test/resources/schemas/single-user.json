@@ -1,19 +1,30 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["data", "support"],
+  "required": ["id", "name", "username", "email", "address", "phone", "company"],
   "properties": {
-    "data": {
+    "id": { "type": "integer" },
+    "name": { "type": "string" },
+    "username": { "type": "string" },
+    "email": { "type": "string" },
+    "phone": { "type": "string" },
+    "website": { "type": "string" },
+    "address": {
       "type": "object",
-      "required": ["id", "email", "first_name", "last_name", "avatar"],
+      "required": ["street", "suite", "city", "zipcode"],
       "properties": {
-        "id": { "type": "integer" },
-        "email": { "type": "string" },
-        "first_name": { "type": "string" },
-        "last_name": { "type": "string" },
-        "avatar": { "type": "string" }
+        "street": { "type": "string" },
+        "suite": { "type": "string" },
+        "city": { "type": "string" },
+        "zipcode": { "type": "string" }
       }
     },
-    "support": { "type": "object" }
+    "company": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" }
+      }
+    }
   }
 }

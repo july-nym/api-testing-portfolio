@@ -1,6 +1,7 @@
 package io.portfolio.qa.tests;
 
 import io.portfolio.qa.base.BaseTest;
+import io.portfolio.qa.models.Post;
 import io.portfolio.qa.models.User;
 import io.portfolio.qa.utils.ApiClient;
 import io.portfolio.qa.utils.SchemaValidator;
@@ -13,15 +14,14 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertEquals;
 
-@Feature("Users")
+@Feature("Users + Posts")
 public class UserTest extends BaseTest {
 
     @Test(groups = {"smoke"})
-    @Description("Single user response deserializes to our POJO and matches schema")
+    @Description("Single user deserializes to our POJO and matches schema")
     public void singleUserMatchesSchemaAndDeserializes() {
-        // POJO deserialization proves the @JsonProperty snake_case mapping works
         User user = given()
-                .spec(reqres)
+                .spec(jsonplaceholder)
         .when()
                 .get("/users/2")
         .then()
@@ -29,11 +29,24 @@ public class UserTest extends BaseTest {
                 .time(lessThan(ApiClient.maxResponseMs()))
                 .body(SchemaValidator.matchesSchema("single-user.json"))
                 .extract()
-                .jsonPath()
-                .getObject("data", User.class);
+                .as(User.class);
 
         org.testng.Assert.assertNotNull(user.getEmail(), "email should deserialize");
-        org.testng.Assert.assertNotNull(user.getFirstName(), "first_name -> firstName");
+        // proves the @JsonProperty("username") -> userName mapping fired
+        org.testng.Assert.assertNotNull(user.getUserName(), "username -> userName");
+        org.testng.Assert.assertNotNull(user.getCompany().getName(), "nested company");
+    }
+
+    @Test(groups = {"smoke"})
+    @Description("The user directory holds exactly ten seeded users")
+    public void directoryHasTenUsers() {
+        given()
+                .spec(jsonplaceholder)
+        .when()
+                .get("/users")
+        .then()
+                .statusCode(200)
+                .body("size()", equalTo(10));
     }
 
     @DataProvider(name = "pages")
@@ -42,61 +55,72 @@ public class UserTest extends BaseTest {
     }
 
     @Test(groups = {"regression"}, dataProvider = "pages")
-    @Description("User list pagination returns the requested page within page size")
-    public void userListPagination(int page) {
+    @Description("Post pagination respects the page limit and advertises the total")
+    public void postPagination(int page) {
         given()
-                .spec(reqres)
-                .queryParam("page", page)
+                .spec(jsonplaceholder)
+                .queryParam("_page", page)
+                .queryParam("_limit", 10)
         .when()
-                .get("/users")
+                .get("/posts")
         .then()
                 .statusCode(200)
-                .body("page", equalTo(page))
-                .body("data.size()", lessThanOrEqualTo(
-                        given().spec(reqres).queryParam("page", page)
-                                .get("/users").jsonPath().getInt("per_page")));
+                // jsonplaceholder reports the full count in a header, not the body
+                .header("X-Total-Count", equalTo("100"))
+                .body("size()", lessThanOrEqualTo(10));
     }
 
     @Test(groups = {"regression"})
-    @Description("Create user echoes the submitted payload and assigns an id")
-    public void createUserEchoesPayload() {
+    @Description("Create post echoes the submitted body and assigns id 101")
+    public void createPostEchoesPayload() {
+        Post draft = Post.builder()
+                .title("Release approved")
+                .body("Smoke green, no P1 regressions on the release branch.")
+                .userId(7)
+                .build();
+
         given()
-                .spec(reqres)
-                .body("{\"name\":\"Sofia Marchetti\",\"job\":\"QA Lead\"}")
+                .spec(jsonplaceholder)
+                .body(draft)
         .when()
-                .post("/users")
+                .post("/posts")
         .then()
                 .statusCode(201)
-                .body("name", equalTo("Sofia Marchetti"))
-                .body("job", equalTo("QA Lead"))
-                .body("id", notNullValue())
-                .body("createdAt", notNullValue());
+                .body(SchemaValidator.matchesSchema("post-create.json"))
+                .body("title", equalTo("Release approved"))
+                .body("userId", equalTo(7))
+                .body("id", equalTo(101)); // jsonplaceholder always returns 101
     }
 
     @Test(groups = {"regression"})
-    @Description("PUT replaces the resource and stamps updatedAt")
-    public void putReplacesUser() {
-        String newJob = given()
-                .spec(reqres)
-                .body("{\"name\":\"Sofia Marchetti\",\"job\":\"Principal QA\"}")
+    @Description("PUT replaces the post body")
+    public void putReplacesPost() {
+        Post replacement = Post.builder()
+                .title("Full replace")
+                .body("Replaced via PUT")
+                .userId(1)
+                .build();
+
+        String title = given()
+                .spec(jsonplaceholder)
+                .body(replacement)
         .when()
-                .put("/users/2")
+                .put("/posts/1")
         .then()
                 .statusCode(200)
-                .body("updatedAt", notNullValue())
-                .extract().path("job");
+                .extract().path("title");
 
-        assertEquals(newJob, "Principal QA");
+        assertEquals(title, "Full replace");
     }
 
     @Test(groups = {"regression"})
-    @Description("DELETE returns 204 with no content")
-    public void deleteUserReturns204() {
+    @Description("DELETE returns 200")
+    public void deletePostReturns200() {
         given()
-                .spec(reqres)
+                .spec(jsonplaceholder)
         .when()
-                .delete("/users/2")
+                .delete("/posts/1")
         .then()
-                .statusCode(204);
+                .statusCode(200);
     }
 }

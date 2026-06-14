@@ -16,7 +16,12 @@ const path = require('path');
 const { PactV3, MatchersV3 } = require('@pact-foundation/pact');
 const { createUserClient } = require('../src/userClient');
 
-const { like, integer, email } = MatchersV3;
+const { like, integer, regex } = MatchersV3;
+
+// Pact JS has no dedicated email matcher, so we pin the shape with a regex.
+// Matching on shape (not the literal address) is the whole point — the provider
+// is free to return any valid email.
+const EMAIL_REGEX = '^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$';
 
 const provider = new PactV3({
   consumer: 'web-portfolio-app',
@@ -41,7 +46,7 @@ describe('User service contract', () => {
         body: {
           data: {
             id: integer(2),
-            email: email('janet.weaver@reqres.in'),
+            email: regex(EMAIL_REGEX, 'janet.weaver@example.com'),
             first_name: like('Janet'),
           },
         },

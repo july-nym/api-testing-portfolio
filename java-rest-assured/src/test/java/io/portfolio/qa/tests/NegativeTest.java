@@ -12,29 +12,17 @@ import static org.hamcrest.Matchers.equalTo;
 @Feature("Negative cases")
 public class NegativeTest extends BaseTest {
 
-    @Test(groups = {"negative", "regression"})
-    @Description("Login without a password is a 400 with a descriptive error")
-    public void loginWithoutPasswordIs400() {
-        given()
-                .spec(reqres)
-                .body("{\"email\":\"peter.holt@reqres.in\"}")
-        .when()
-                .post("/login")
-        .then()
-                .statusCode(400)
-                .body("error", equalTo("Missing password"));
-    }
-
     @DataProvider(name = "missingIds")
     public Object[][] missingIds() {
-        return new Object[][]{{0}, {23}, {999}};
+        // jsonplaceholder only seeds 10 users; anything beyond is a 404
+        return new Object[][]{{11}, {99}, {999}};
     }
 
     @Test(groups = {"negative", "regression"}, dataProvider = "missingIds")
-    @Description("Unknown reqres user ids return 404")
+    @Description("Unknown user ids return 404")
     public void unknownUserReturns404(int id) {
         given()
-                .spec(reqres)
+                .spec(jsonplaceholder)
         .when()
                 .get("/users/" + id)
         .then()
@@ -42,20 +30,30 @@ public class NegativeTest extends BaseTest {
     }
 
     @Test(groups = {"negative", "regression"})
+    @Description("Unknown post returns 404")
+    public void unknownPostReturns404() {
+        given()
+                .spec(jsonplaceholder)
+        .when()
+                .get("/posts/9999")
+        .then()
+                .statusCode(404);
+    }
+
+    @Test(groups = {"negative", "regression"})
     @Description("A write to booker without the auth cookie is forbidden (403)")
     public void writeWithoutAuthIsForbidden() {
-        int bookingId = given().spec(booker)
-                .body("{\"firstname\":\"Temp\",\"lastname\":\"Record\",\"totalprice\":1," +
-                        "\"depositpaid\":true,\"bookingdates\":{\"checkin\":\"2026-01-01\"," +
-                        "\"checkout\":\"2026-01-02\"}}")
+        String body = "{\"firstname\":\"Temp\",\"lastname\":\"Record\",\"totalprice\":1," +
+                "\"depositpaid\":true,\"bookingdates\":{\"checkin\":\"2026-01-01\"," +
+                "\"checkout\":\"2026-01-02\"}}";
+
+        int bookingId = given().spec(booker).body(body)
                 .when().post("/booking")
                 .then().statusCode(200).extract().path("bookingid");
 
         given()
                 .spec(booker) // deliberately no Cookie header
-                .body("{\"firstname\":\"Temp\",\"lastname\":\"Record\",\"totalprice\":1," +
-                        "\"depositpaid\":true,\"bookingdates\":{\"checkin\":\"2026-01-01\"," +
-                        "\"checkout\":\"2026-01-02\"}}")
+                .body(body)
         .when()
                 .put("/booking/" + bookingId)
         .then()

@@ -23,9 +23,4 @@ function bookerAuthHeader(token) {
   return { Cookie: `token=${token}` };
 }
 
-async function loginToReqres(reqresClient, email, password) {
-  const res = await reqresClient.post('/login', { email, password });
-  return res.data.token; // undefined on the negative paths, which is fine
-}
-
-module.exports = { getBookerToken, bookerAuthHeader, loginToReqres };
+module.exports = { getBookerToken, bookerAuthHeader };

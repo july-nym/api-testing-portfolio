@@ -14,13 +14,12 @@ environment-driven, and every suite runs headless on push.
 
 ## Targets under test
 
-All public, no signup required — the suites run on a fresh clone:
+All public and **keyless** — the suites run on a fresh clone with no secrets:
 
 | API | Used for |
 | --- | --- |
-| [reqres.in](https://reqres.in) | Auth + user CRUD (primary) |
-| [jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com) | Read-mostly cross-host checks (secondary) |
-| [restful-booker](https://restful-booker.herokuapp.com) | Stateful create/read/update/delete lifecycle |
+| [jsonplaceholder.typicode.com](https://jsonplaceholder.typicode.com) | User reads, post CRUD, schema + pagination checks (primary) |
+| [restful-booker](https://restful-booker.herokuapp.com) | Auth tokens + stateful create/read/update/delete lifecycle |
 
 ## Tech stack
 

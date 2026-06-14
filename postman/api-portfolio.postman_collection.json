@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "API Portfolio - reqres + restful-booker",
-    "description": "Smoke + CRUD coverage across reqres (auth/users) and restful-booker (booking lifecycle). Designed to run headless under Newman in CI. Variables resolve from the selected environment file.",
+    "name": "API Portfolio - jsonplaceholder + restful-booker",
+    "description": "Smoke + CRUD coverage across jsonplaceholder (user reads + post writes) and restful-booker (auth + booking lifecycle). Both targets are keyless, so this runs headless under Newman in CI with no secrets. Variables resolve from the selected environment file.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -9,78 +9,7 @@
   ],
   "item": [
     {
-      "name": "reqres - auth",
-      "item": [
-        {
-          "name": "Login (seeded account)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status is 200', () => pm.response.to.have.status(200));",
-                  "pm.test('responds under SLA', () => pm.expect(pm.response.responseTime).to.be.below(Number(pm.environment.get('maxResponseMs'))));",
-                  "const body = pm.response.json();",
-                  "pm.test('token is present', () => pm.expect(body.token).to.be.a('string').and.not.empty);",
-                  "// stash the token for any downstream request that needs it",
-                  "pm.environment.set('reqresToken', body.token);"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "x-api-key", "value": "{{reqresApiKey}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"eve.holt@reqres.in\",\n  \"password\": \"cityslicka\"\n}"
-            },
-            "url": {
-              "raw": "{{reqresBaseUrl}}/login",
-              "host": ["{{reqresBaseUrl}}"],
-              "path": ["login"]
-            }
-          }
-        },
-        {
-          "name": "Login - missing password (negative)",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('status is 400', () => pm.response.to.have.status(400));",
-                  "pm.test('error explains the cause', () => pm.expect(pm.response.json().error).to.eql('Missing password'));"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "x-api-key", "value": "{{reqresApiKey}}" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"peter.holt@reqres.in\"\n}"
-            },
-            "url": {
-              "raw": "{{reqresBaseUrl}}/login",
-              "host": ["{{reqresBaseUrl}}"],
-              "path": ["login"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "reqres - users",
+      "name": "jsonplaceholder - users & posts",
       "item": [
         {
           "name": "Get single user + schema check",
@@ -91,21 +20,17 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('status is 200', () => pm.response.to.have.status(200));",
+                  "pm.test('responds under SLA', () => pm.expect(pm.response.responseTime).to.be.below(Number(pm.environment.get('maxResponseMs'))));",
                   "const userSchema = {",
                   "  type: 'object',",
-                  "  required: ['data'],",
+                  "  required: ['id', 'name', 'username', 'email', 'address', 'company'],",
                   "  properties: {",
-                  "    data: {",
-                  "      type: 'object',",
-                  "      required: ['id', 'email', 'first_name', 'last_name', 'avatar'],",
-                  "      properties: {",
-                  "        id: { type: 'integer' },",
-                  "        email: { type: 'string' },",
-                  "        first_name: { type: 'string' },",
-                  "        last_name: { type: 'string' },",
-                  "        avatar: { type: 'string' }",
-                  "      }",
-                  "    }",
+                  "    id: { type: 'integer' },",
+                  "    name: { type: 'string' },",
+                  "    username: { type: 'string' },",
+                  "    email: { type: 'string' },",
+                  "    address: { type: 'object' },",
+                  "    company: { type: 'object' }",
                   "  }",
                   "};",
                   "pm.test('matches user schema', () => pm.response.to.have.jsonSchema(userSchema));"
@@ -115,16 +40,16 @@
           ],
           "request": {
             "method": "GET",
-            "header": [{ "key": "x-api-key", "value": "{{reqresApiKey}}" }],
+            "header": [],
             "url": {
-              "raw": "{{reqresBaseUrl}}/users/2",
-              "host": ["{{reqresBaseUrl}}"],
+              "raw": "{{jsonplaceholderBaseUrl}}/users/2",
+              "host": ["{{jsonplaceholderBaseUrl}}"],
               "path": ["users", "2"]
             }
           }
         },
         {
-          "name": "Create user",
+          "name": "Create post",
           "event": [
             {
               "listen": "test",
@@ -133,26 +58,46 @@
                 "exec": [
                   "pm.test('status is 201', () => pm.response.to.have.status(201));",
                   "const created = pm.response.json();",
-                  "pm.test('echoes the job we sent', () => pm.expect(created.job).to.eql('QA Lead'));",
-                  "pm.test('assigns an id', () => pm.expect(created.id).to.exist);"
+                  "pm.test('echoes the title we sent', () => pm.expect(created.title).to.eql('Regression sign-off checklist'));",
+                  "pm.test('assigns id 101', () => pm.expect(created.id).to.eql(101));"
                 ]
               }
             }
           ],
           "request": {
             "method": "POST",
-            "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "x-api-key", "value": "{{reqresApiKey}}" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Sofia Marchetti\",\n  \"job\": \"QA Lead\"\n}"
+              "raw": "{\n  \"title\": \"Regression sign-off checklist\",\n  \"body\": \"Smoke green, schema stable, no P1 regressions.\",\n  \"userId\": 7\n}"
             },
             "url": {
-              "raw": "{{reqresBaseUrl}}/users",
-              "host": ["{{reqresBaseUrl}}"],
-              "path": ["users"]
+              "raw": "{{jsonplaceholderBaseUrl}}/posts",
+              "host": ["{{jsonplaceholderBaseUrl}}"],
+              "path": ["posts"]
+            }
+          }
+        },
+        {
+          "name": "Unknown user returns 404 (negative)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('status is 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{jsonplaceholderBaseUrl}}/users/999",
+              "host": ["{{jsonplaceholderBaseUrl}}"],
+              "path": ["users", "999"]
             }
           }
         }

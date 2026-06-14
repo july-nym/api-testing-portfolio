@@ -33,5 +33,3 @@ jobs:
 
       - name: Run Jest (serial — live sandboxes don't love parallel bursts)
         run: npm run test:ci
-        env:
-          REQRES_API_KEY: ${{ secrets.REQRES_API_KEY || 'reqres-free-v1' }}

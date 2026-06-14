@@ -4,8 +4,8 @@ API test suite built with **Java 17 + REST Assured + TestNG + Maven**.
 
 ## Highlights
 - Fluent **Given/When/Then** REST Assured syntax
-- **POJO (de)serialization** with Jackson + Lombok (`User`, `Booking`)
-  — including snake_case → camelCase mapping via `@JsonProperty`
+- **POJO (de)serialization** with Jackson + Lombok (`User`, `Post`, `Booking`)
+  — including JSON-key → camelCase field mapping via `@JsonProperty`
 - JSON schema validation (`json-schema-validator` module)
 - TestNG **groups** (`smoke`, `regression`, `negative`) + data providers
 - **Allure** reporting (AspectJ-woven `@Step`/`@Description`)
@@ -22,14 +22,15 @@ mvn test && allure serve target/allure-results
 ```
 
 Config defaults live in `src/test/resources/config-dev.properties`; the
-`REQRES_BASE_URL` / `REQRES_API_KEY` / `BOOKER_BASE_URL` env vars override them
-at runtime so CI never edits a checked-in file.
+`JSONPLACEHOLDER_BASE_URL` / `BOOKER_BASE_URL` env vars override them at runtime
+so CI never edits a checked-in file.
 
 ## Layout
 ```
 src/test/java/io/portfolio/qa/
   base/BaseTest.java          spec setup + cached booker token
   models/User.java            Lombok + Jackson POJOs
+  models/Post.java
   models/Booking.java
   utils/ApiClient.java        request specs, config loading
   utils/SchemaValidator.java  classpath schema matcher

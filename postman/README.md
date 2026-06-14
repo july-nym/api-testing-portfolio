@@ -1,11 +1,13 @@
 # postman
 
-Postman collection for reqres + restful-booker, runnable headless via **Newman**.
+Postman collection for jsonplaceholder + restful-booker, runnable headless via
+**Newman**.
 
 ## Contents
-- `api-portfolio.postman_collection.json` — auth, user CRUD, schema checks, and a
-  full booking create → update → delete lifecycle. Tests are written in the
-  request `test` scripts (status, schema, response-time, value assertions).
+- `api-portfolio.postman_collection.json` — user reads, post create, schema
+  checks, and a full booking auth → create → update → delete lifecycle. Tests are
+  written in the request `test` scripts (status, schema, response-time, value
+  assertions).
 - `environments/dev.*` / `environments/staging.*` — per-env variables.
 - `run-newman.sh` — CLI runner that emits a CLI summary + JUnit XML.
 

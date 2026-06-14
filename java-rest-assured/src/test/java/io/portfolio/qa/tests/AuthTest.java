@@ -6,38 +6,10 @@ import io.qameta.allure.Feature;
 import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.equalTo;
 
 @Feature("Authentication")
 public class AuthTest extends BaseTest {
-
-    @Test(groups = {"smoke"})
-    @Description("A seeded reqres account receives a token on login")
-    public void seededUserCanLogIn() {
-        given()
-                .spec(reqres)
-                .body("{\"email\":\"eve.holt@reqres.in\",\"password\":\"cityslicka\"}")
-        .when()
-                .post("/login")
-        .then()
-                .statusCode(200)
-                .body("token", notNullValue());
-    }
-
-    @Test(groups = {"smoke"})
-    @Description("Register returns reqres' fixed id and a token")
-    public void registerReturnsIdAndToken() {
-        given()
-                .spec(reqres)
-                .body("{\"email\":\"eve.holt@reqres.in\",\"password\":\"pistol\"}")
-        .when()
-                .post("/register")
-        .then()
-                .statusCode(200)
-                .body("id", greaterThan(0))
-                .body("token", notNullValue());
-    }
 
     @Test(groups = {"smoke", "regression"})
     @Description("restful-booker issues a usable session token")
@@ -46,5 +18,18 @@ public class AuthTest extends BaseTest {
         String token = bookerToken();
         org.testng.Assert.assertTrue(token != null && token.length() > 10,
                 "Expected a non-trivial booker token");
+    }
+
+    @Test(groups = {"negative", "regression"})
+    @Description("Bad booker credentials return a reason body rather than a 401")
+    public void badCredentialsReturnReason() {
+        given()
+                .spec(booker)
+                .body("{\"username\":\"admin\",\"password\":\"nope\"}")
+        .when()
+                .post("/auth")
+        .then()
+                .statusCode(200)
+                .body("reason", equalTo("Bad credentials"));
     }
 }

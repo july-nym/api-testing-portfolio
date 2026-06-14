@@ -10,8 +10,8 @@ import java.util.Properties;
 /**
  * Builds reusable REST Assured request specs, one per target API.
  *
- * Centralising the specs keeps base URLs and the reqres API key out of the test
- * bodies, so a test reads as pure Given/When/Then. Config is loaded from
+ * Centralising the specs keeps base URLs out of the test bodies, so a test reads
+ * as pure Given/When/Then. Config is loaded from
  * config-${env}.properties, selected by the `env` system property (wired through
  * a Maven profile), falling back to dev.
  */
@@ -36,8 +36,7 @@ public final class ApiClient {
             throw new IllegalStateException("Could not load " + resource, e);
         }
         // env vars win over the file so CI can override without editing resources
-        overrideFromEnv(props, "REQRES_BASE_URL", "reqres.baseUrl");
-        overrideFromEnv(props, "REQRES_API_KEY", "reqres.apiKey");
+        overrideFromEnv(props, "JSONPLACEHOLDER_BASE_URL", "jsonplaceholder.baseUrl");
         overrideFromEnv(props, "BOOKER_BASE_URL", "booker.baseUrl");
         return props;
     }
@@ -57,11 +56,10 @@ public final class ApiClient {
         return Long.parseLong(CONFIG.getProperty("maxResponseMs", "2000"));
     }
 
-    /** reqres spec, pre-loaded with the API key it now requires for writes. */
-    public static RequestSpecification reqres() {
+    /** jsonplaceholder spec — keyless, used for user reads + post CRUD. */
+    public static RequestSpecification jsonplaceholder() {
         return new RequestSpecBuilder()
-                .setBaseUri(CONFIG.getProperty("reqres.baseUrl"))
-                .addHeader("x-api-key", CONFIG.getProperty("reqres.apiKey"))
+                .setBaseUri(CONFIG.getProperty("jsonplaceholder.baseUrl"))
                 .setContentType(ContentType.JSON)
                 .setAccept(ContentType.JSON)
                 .build();

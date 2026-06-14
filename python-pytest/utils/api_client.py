@@ -1,9 +1,10 @@
 """Thin wrapper around requests.Session.
 
 The point of this class is to centralise three things that otherwise get
-copy-pasted into every test: the base URL, the default headers (including the
-reqres key), and a single place to capture how long the call took. Tests stay
-readable because they only deal in paths and payloads.
+copy-pasted into every test: the base URL, the default headers, and a single
+place to capture how long the call took. Tests stay readable because they only
+deal in paths and payloads. An optional API key is still supported for any host
+that needs one, even though the current targets are keyless.
 """
 from __future__ import annotations
 
@@ -24,8 +25,8 @@ class ApiClient:
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
         self._session = requests.Session()
-        # reqres rejects unauthenticated writes with a 401, so the key rides on
-        # every request when one is supplied.
+        # An x-api-key rides on every request when one is supplied — kept generic
+        # so the client works against a key-gated host without code changes.
         if api_key:
             self._session.headers["x-api-key"] = api_key
         self._session.headers["Accept"] = "application/json"

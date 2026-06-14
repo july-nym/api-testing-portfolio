@@ -5,39 +5,45 @@ the tests that use them and it's one less thing to load from disk. If these grow
 past a handful, splitting them into a schemas/ directory would be the next move.
 """
 
-# reqres single-user payload, e.g. GET /users/2
+# jsonplaceholder user, e.g. GET /users/2 — note the nested address/company.
+# We only require the fields we actually assert on; extra fields are allowed.
 SINGLE_USER_SCHEMA = {
     "type": "object",
-    "required": ["data", "support"],
+    "required": ["id", "name", "username", "email", "address", "phone", "company"],
     "properties": {
-        "data": {
+        "id": {"type": "integer"},
+        "name": {"type": "string"},
+        "username": {"type": "string"},
+        "email": {"type": "string", "format": "email"},
+        "phone": {"type": "string"},
+        "website": {"type": "string"},
+        "address": {
             "type": "object",
-            "required": ["id", "email", "first_name", "last_name", "avatar"],
+            "required": ["street", "suite", "city", "zipcode"],
             "properties": {
-                "id": {"type": "integer"},
-                "email": {"type": "string", "format": "email"},
-                "first_name": {"type": "string"},
-                "last_name": {"type": "string"},
-                "avatar": {"type": "string"},
+                "street": {"type": "string"},
+                "suite": {"type": "string"},
+                "city": {"type": "string"},
+                "zipcode": {"type": "string"},
             },
         },
-        "support": {"type": "object"},
+        "company": {
+            "type": "object",
+            "required": ["name"],
+            "properties": {"name": {"type": "string"}},
+        },
     },
 }
 
-# reqres paginated list, e.g. GET /users?page=2
-USER_LIST_SCHEMA = {
+# jsonplaceholder create response, e.g. POST /posts -> 201
+POST_CREATE_SCHEMA = {
     "type": "object",
-    "required": ["page", "per_page", "total", "total_pages", "data"],
+    "required": ["id", "title", "body", "userId"],
     "properties": {
-        "page": {"type": "integer"},
-        "per_page": {"type": "integer"},
-        "total": {"type": "integer"},
-        "total_pages": {"type": "integer"},
-        "data": {
-            "type": "array",
-            "items": SINGLE_USER_SCHEMA["properties"]["data"],
-        },
+        "id": {"type": "integer"},
+        "title": {"type": "string"},
+        "body": {"type": "string"},
+        "userId": {"type": "integer"},
     },
 }
 

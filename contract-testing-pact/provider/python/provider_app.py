@@ -33,10 +33,10 @@ def provider_states():
     if state == "user 2 exists":
         _users[2] = {
             "id": 2,
-            "email": "janet.weaver@reqres.in",
+            "email": "janet.weaver@example.com",
             "first_name": "Janet",
             "last_name": "Weaver",
-            "avatar": "https://reqres.in/img/faces/2-image.jpg",
+            "avatar": "https://cdn.example.com/faces/2.jpg",
         }
     return jsonify({"result": state})
 

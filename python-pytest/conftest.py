@@ -1,7 +1,7 @@
 """Shared fixtures and session setup.
 
 Scope choices matter here: the API clients are session-scoped because building a
-requests.Session per test is wasteful and reqres/booker are stateless enough to
+requests.Session per test is wasteful and the sandboxes are stateless enough to
 share one. The booker auth token is also session-scoped — restful-booker tokens
 are valid for the run, so re-authenticating per test would just hammer the
 sandbox for no benefit.
@@ -17,17 +17,6 @@ from utils.api_client import ApiClient
 @pytest.fixture(scope="session")
 def settings():
     return get_settings()
-
-
-@pytest.fixture(scope="session")
-def reqres(settings):
-    client = ApiClient(
-        settings.reqres_base_url,
-        api_key=settings.reqres_api_key,
-        timeout=settings.request_timeout,
-    )
-    yield client
-    client.close()
 
 
 @pytest.fixture(scope="session")
@@ -78,4 +67,14 @@ def new_booking_payload():
         "depositpaid": True,
         "bookingdates": {"checkin": "2026-09-12", "checkout": "2026-09-19"},
         "additionalneeds": "Late checkout",
+    }
+
+
+@pytest.fixture
+def new_post_payload():
+    """A realistic jsonplaceholder post body for create/update tests."""
+    return {
+        "title": "Regression sign-off checklist",
+        "body": "Smoke green, schema stable, no P1 regressions on the release branch.",
+        "userId": 7,
     }

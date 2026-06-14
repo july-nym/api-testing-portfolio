@@ -1,12 +1,11 @@
 /**
  * Centralised endpoints + tuneables, read from the environment with
  * public-sandbox fallbacks so `npm test` works on a fresh clone.
+ *
+ * Both targets are keyless: jsonplaceholder for user reads + post CRUD, and
+ * restful-booker for real auth + a stateful booking lifecycle.
  */
 module.exports = {
-  reqres: {
-    baseURL: process.env.REQRES_BASE_URL || 'https://reqres.in/api',
-    apiKey: process.env.REQRES_API_KEY || 'reqres-free-v1',
-  },
   jsonplaceholder: {
     baseURL:
       process.env.JSONPLACEHOLDER_BASE_URL || 'https://jsonplaceholder.typicode.com',

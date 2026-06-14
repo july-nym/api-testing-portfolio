@@ -9,7 +9,6 @@ import pytest
 
 from utils.assertions import (
     assert_status,
-    assert_response_under,
     assert_matches_schema,
 )
 from utils.schemas import BOOKING_CREATE_SCHEMA
@@ -22,10 +21,10 @@ def auth_cookie(booker_token):
 
 
 @pytest.mark.smoke
-def test_create_booking_returns_id(booker, new_booking_payload, settings):
+def test_create_booking_returns_id(booker, new_booking_payload):
     resp = booker.post("/booking", json=new_booking_payload)
     assert_status(resp, 200)
-    assert_response_under(resp, settings.max_response_ms)
+    # No latency gate against booker's cold-starting free dyno — see test_auth.
     assert_matches_schema(resp.json(), BOOKING_CREATE_SCHEMA)
     assert resp.json()["booking"]["firstname"] == "Mariana"
 

@@ -9,6 +9,8 @@ __pycache__/
 node_modules/
 postman/reports/
 contract-testing-pact/**/node_modules/
+# Lockfiles are intentionally not committed — CI installs from package.json
+package-lock.json
 
 # --- Java / Maven ---
 target/
@@ -18,8 +20,10 @@ allure-results/
 
 # --- Pact ---
 # Generated pacts are kept under version control as samples, but logs aren't
+contract-testing-pact/**/log/
 contract-testing-pact/**/logs/
 pact/logs/
+*.log
 
 # --- IDE / OS ---
 .idea/

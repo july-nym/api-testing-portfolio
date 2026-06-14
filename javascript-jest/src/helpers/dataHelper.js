@@ -5,10 +5,9 @@
  * record, not "test test test".
  */
 
-let bookingCounter = 0;
+let postCounter = 0;
 
 function buildBooking(overrides = {}) {
-  bookingCounter += 1;
   return {
     firstname: 'Priya',
     lastname: 'Ramanathan',
@@ -18,18 +17,20 @@ function buildBooking(overrides = {}) {
       checkin: '2026-07-03',
       checkout: '2026-07-10',
     },
-    // makes it easy to eyeball which booking a given test created
-    additionalneeds: `Quiet room (#${bookingCounter})`,
+    additionalneeds: 'Quiet room',
     ...overrides,
   };
 }
 
-function buildReqresUser(overrides = {}) {
+function buildPost(overrides = {}) {
+  postCounter += 1;
   return {
-    name: 'Lars Petersen',
-    job: 'Senior QA Engineer',
+    title: 'Regression sign-off checklist',
+    // the counter makes it easy to eyeball which post a given test created
+    body: `Smoke green, schema stable, no P1 regressions (#${postCounter}).`,
+    userId: 7,
     ...overrides,
   };
 }
 
-module.exports = { buildBooking, buildReqresUser };
+module.exports = { buildBooking, buildPost };
