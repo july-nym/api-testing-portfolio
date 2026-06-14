@@ -66,10 +66,14 @@ public final class ApiClient {
     }
 
     public static RequestSpecification booker() {
+        // NOTE: use an explicit "application/json" Accept rather than
+        // setAccept(ContentType.JSON). REST Assured expands ContentType.JSON into
+        // a multi-value Accept ("application/json, application/javascript, …"),
+        // and restful-booker answers that with a 418. A clean single value is fine.
         return new RequestSpecBuilder()
                 .setBaseUri(CONFIG.getProperty("booker.baseUrl"))
                 .setContentType(ContentType.JSON)
-                .setAccept(ContentType.JSON)
+                .addHeader("Accept", "application/json")
                 .build();
     }
 }
