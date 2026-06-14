@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Full suite: every group. Surefire runs this by default. -->
+<suite name="api-regression-suite" verbose="1" parallel="classes" thread-count="3">
+    <test name="all-tests">
+        <classes>
+            <class name="io.portfolio.qa.tests.AuthTest"/>
+            <class name="io.portfolio.qa.tests.UserTest"/>
+            <class name="io.portfolio.qa.tests.BookingTest"/>
+            <class name="io.portfolio.qa.tests.NegativeTest"/>
+        </classes>
+    </test>
+</suite>

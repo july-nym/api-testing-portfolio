@@ -1,0 +1,54 @@
+name: pact-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'contract-testing-pact/**'
+      - '.github/workflows/pact-tests.yml'
+  pull_request:
+    paths:
+      - 'contract-testing-pact/**'
+      - '.github/workflows/pact-tests.yml'
+
+jobs:
+  # Consumer generates the pact; provider then verifies it. Running them as
+  # sequential jobs (with the pact passed as an artifact) mirrors how the two
+  # would live in separate repos/pipelines in the real world.
+  consumer:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contract-testing-pact/consumer/javascript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - name: Generate pact
+        run: npm run test:pact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pacts
+          path: contract-testing-pact/consumer/javascript/pacts/
+
+  provider:
+    needs: consumer
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contract-testing-pact/provider/python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Pull the consumer's pact
+        uses: actions/download-artifact@v4
+        with:
+          name: pacts
+          path: contract-testing-pact/consumer/javascript/pacts/
+      - run: pip install -r requirements.txt
+      - name: Verify provider against the contract
+        run: pytest -ra

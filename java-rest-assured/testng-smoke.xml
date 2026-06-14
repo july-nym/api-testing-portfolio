@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
+<!-- Smoke-only suite, selected by the `smoke` Maven profile. Filters by group
+     so we don't have to maintain a parallel list of class names. -->
+<suite name="api-smoke-suite" verbose="1">
+    <test name="smoke">
+        <groups>
+            <run>
+                <include name="smoke"/>
+            </run>
+        </groups>
+        <packages>
+            <package name="io.portfolio.qa.tests"/>
+        </packages>
+    </test>
+</suite>

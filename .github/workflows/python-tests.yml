@@ -1,0 +1,45 @@
+name: python-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'python-pytest/**'
+      - '.github/workflows/python-tests.yml'
+  pull_request:
+    paths:
+      - 'python-pytest/**'
+      - '.github/workflows/python-tests.yml'
+
+defaults:
+  run:
+    working-directory: python-pytest
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      # don't cancel 3.12 just because 3.11 flaked on a public sandbox
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: python-pytest/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Smoke tests (fail fast on a broken build)
+        run: pytest -m smoke
+
+      - name: Full suite
+        run: pytest -ra
+        env:
+          REQRES_API_KEY: ${{ secrets.REQRES_API_KEY || 'reqres-free-v1' }}

@@ -1,0 +1,44 @@
+name: java-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'java-rest-assured/**'
+      - '.github/workflows/java-tests.yml'
+  pull_request:
+    paths:
+      - 'java-rest-assured/**'
+      - '.github/workflows/java-tests.yml'
+
+defaults:
+  run:
+    working-directory: java-rest-assured
+
+jobs:
+  maven:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Smoke profile
+        run: mvn -B test -Psmoke
+
+      - name: Full suite
+        run: mvn -B test
+
+      # Keep the TestNG/Surefire output around for triage even on green runs
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: java-rest-assured/target/surefire-reports/
+          if-no-files-found: ignore

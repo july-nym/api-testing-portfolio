@@ -1,0 +1,37 @@
+name: javascript-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'javascript-jest/**'
+      - '.github/workflows/javascript-tests.yml'
+  pull_request:
+    paths:
+      - 'javascript-jest/**'
+      - '.github/workflows/javascript-tests.yml'
+
+defaults:
+  run:
+    working-directory: javascript-jest
+
+jobs:
+  jest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: javascript-jest/package.json
+
+      # no committed lockfile, so plain install rather than npm ci
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Jest (serial — live sandboxes don't love parallel bursts)
+        run: npm run test:ci
+        env:
+          REQRES_API_KEY: ${{ secrets.REQRES_API_KEY || 'reqres-free-v1' }}

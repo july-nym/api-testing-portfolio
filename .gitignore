@@ -1,0 +1,28 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.env
+
+# --- Node / Jest / Newman ---
+node_modules/
+postman/reports/
+contract-testing-pact/**/node_modules/
+
+# --- Java / Maven ---
+target/
+*.class
+.allure/
+allure-results/
+
+# --- Pact ---
+# Generated pacts are kept under version control as samples, but logs aren't
+contract-testing-pact/**/logs/
+pact/logs/
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+*.iml
+.DS_Store

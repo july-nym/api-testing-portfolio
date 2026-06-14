@@ -1,0 +1,4 @@
+pytest==8.2.2
+flask==3.0.3
+# pact-python bundles the Ruby standalone verifier under the hood
+pact-python==2.2.0

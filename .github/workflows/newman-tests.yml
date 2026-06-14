@@ -1,0 +1,40 @@
+name: newman-tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'postman/**'
+      - '.github/workflows/newman-tests.yml'
+  pull_request:
+    paths:
+      - 'postman/**'
+      - '.github/workflows/newman-tests.yml'
+
+defaults:
+  run:
+    working-directory: postman
+
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run collection (dev environment)
+        run: ./run-newman.sh dev
+
+      - name: Upload Newman JUnit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-report
+          path: postman/reports/
+          if-no-files-found: ignore

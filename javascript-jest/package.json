@@ -1,0 +1,23 @@
+{
+  "name": "api-testing-portfolio-jest",
+  "version": "1.0.0",
+  "description": "API test suite using axios + Jest against public sandbox APIs",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:smoke": "jest --testPathPattern='auth|users'",
+    "test:negative": "jest negative.test.js",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --runInBand --reporters=default"
+  },
+  "keywords": ["api-testing", "jest", "axios", "qa"],
+  "license": "MIT",
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "jest": "^29.7.0",
+    "jest-extended": "^4.0.2"
+  }
+}
