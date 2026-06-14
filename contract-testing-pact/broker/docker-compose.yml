@@ -1,0 +1,29 @@
+# Local Pact Broker — the simulation the README refers to.
+#
+# Bring it up with `docker compose up -d`, then open http://localhost:9292.
+# The consumer publishes pacts here (npm run publish:pact) and the provider
+# pulls them down to verify (PACT_BROKER_BASE_URL=http://localhost:9292 pytest).
+# A Postgres backs the broker so published contracts survive a restart.
+services:
+  broker_db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: pact
+      POSTGRES_PASSWORD: pact
+      POSTGRES_DB: pact_broker
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "pact"]
+      interval: 5s
+      retries: 10
+
+  pact_broker:
+    image: pactfoundation/pact-broker:latest
+    ports:
+      - "9292:9292"
+    depends_on:
+      broker_db:
+        condition: service_healthy
+    environment:
+      PACT_BROKER_DATABASE_URL: "postgres://pact:pact@broker_db/pact_broker"
+      PACT_BROKER_BASIC_AUTH_USERNAME: pact
+      PACT_BROKER_BASIC_AUTH_PASSWORD: pact
