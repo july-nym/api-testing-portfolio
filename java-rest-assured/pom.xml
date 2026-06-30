@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <rest-assured.version>5.4.0</rest-assured.version>
         <testng.version>7.10.2</testng.version>
-        <jackson.version>2.17.1</jackson.version>
+        <jackson.version>2.22.0</jackson.version>
         <lombok.version>1.18.32</lombok.version>
         <allure.version>2.27.0</allure.version>
         <aspectj.version>1.9.22</aspectj.version>
